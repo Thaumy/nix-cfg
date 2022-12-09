@@ -33,7 +33,7 @@
     inputMethod = {
       enabled = "fcitx5";
       fcitx5 = {
-        #addons = with pkgs; [ fctix5-chinese-addons ];
+        addons = with pkgs; [ fcitx5-chinese-addons ];
       };
     };
     extraLocaleSettings = {
@@ -122,8 +122,8 @@
       after = [ "network.target" ];
       serviceConfig = {
         Type = "simple";
-	Restart = "always";
-	ExecStart = "${pkgs.clash}/bin/clash -d /home/thaumy/cfg/clash";
+	      Restart = "always";
+	      ExecStart = "${pkgs.clash}/bin/clash -d /home/thaumy/cfg/clash";
       };
       wantedBy= [ "multi-user.target" ];
     };

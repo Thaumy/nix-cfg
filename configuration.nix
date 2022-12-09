@@ -50,21 +50,30 @@
   };
 
   fonts.fonts = with pkgs; [
+    noto-fonts
     sarasa-gothic
     jetbrains-mono
+    liberation_ttf
   ];
 
-  # Enable the X11 windowing system.
-  services.xserver.enable = true;
-
-  # Enable the GNOME Desktop Environment.
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
-
-  # Configure keymap in X11
   services.xserver = {
+    enable = true;
+
+    # Configure keymap in X11
     layout = "us";
     xkbVariant = "";
+
+    # Enable the GNOME Desktop Environment.
+    displayManager.gdm.enable = true;
+    desktopManager.gnome.enable = true;
+
+    videoDrivers = [ "nvidia" ];
+  };
+
+  hardware = {
+    opengl.enable = true;
+    nvidia.modesetting.enable = true;
+    nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
   };
 
   # Enable CUPS to print documents.
@@ -120,11 +129,10 @@
     };
   };
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
-
   environment = {
     systemPackages = with pkgs; [
+      (writeShellScriptBin "backup" 
+        (builtins.readFile /home/thaumy/app/sh/backup/backup.sh))
       go
       tor
       vlc
@@ -171,9 +179,13 @@
       jetbrains.idea-ultimate
     ];
     variables = {
+      GDK_SCALE = "1.25";
+      GDK_DPI_SCALE = "1.5";
       EDITOR = "nvim";
+      PATH = [ "/home/thaumy/app/sh/" ];
     };
   };
+  services.xserver.dpi = 180;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -217,5 +229,6 @@
 
   nix.settings.substituters = [
     "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
+    "https://cache.nixos.org/"
   ];
 }

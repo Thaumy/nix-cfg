@@ -16,7 +16,7 @@
     kernelPackages = pkgs.linuxPackages_6_0;
   };
 
-  networking.hostName = "nixos"; # Define your hostname.
+  networking.hostName = "nixos"; # hostname
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -49,12 +49,24 @@
     };
   };
 
-  fonts.fonts = with pkgs; [
-    noto-fonts
-    sarasa-gothic
-    jetbrains-mono
-    liberation_ttf
-  ];
+  fonts = {
+    enableDefaultFonts = true;
+    fonts = with pkgs; [
+      noto-fonts
+      sarasa-gothic
+      jetbrains-mono
+      liberation_ttf
+      twemoji-color-font
+    ];
+    fontconfig = {
+      defaultFonts = {
+        emoji = [ "Twitter Color Emoji" ];
+        serif = [ "Liberation Serif" ];
+        sansSerif = [ "Sarasa UI SC" ];
+        monospace = [ "JetBrains Mono" ];
+      };
+    };
+  };
 
   services.xserver = {
     enable = true;
@@ -68,12 +80,13 @@
     desktopManager.gnome.enable = true;
 
     videoDrivers = [ "nvidia" ];
+    excludePackages = [ pkgs.xterm ];
   };
 
   hardware = {
     opengl.enable = true;
     nvidia.modesetting.enable = true;
-    nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
+    nvidia.package = config.boot.kernelPackages.nvidiaPackages.production;
   };
 
   # Enable CUPS to print documents.
@@ -122,8 +135,8 @@
       after = [ "network.target" ];
       serviceConfig = {
         Type = "simple";
-	      Restart = "always";
-	      ExecStart = "${pkgs.clash}/bin/clash -d /home/thaumy/cfg/clash";
+        Restart = "always";
+        ExecStart = "${pkgs.clash}/bin/clash -d /home/thaumy/cfg/clash";
       };
       wantedBy= [ "multi-user.target" ];
     };
@@ -164,7 +177,6 @@
       obs-studio
       dotnet-sdk_7
       postgresql_15
-      pinentry-gnome
       ffmpeg_5-full
       github-desktop
       android-studio
@@ -178,9 +190,17 @@
       jetbrains.webstorm
       jetbrains.idea-ultimate
     ];
+    gnome.excludePackages = with pkgs; [
+      gnome-tour 
+      gnome.gnome-maps
+      gnome.gnome-music
+      gnome.simple-scan
+      gnome.gnome-weather
+      gnome.gnome-contacts
+    ];
     variables = {
-      GDK_SCALE = "1.25";
-      GDK_DPI_SCALE = "1.5";
+      #GDK_SCALE = "1.25";
+      #GDK_DPI_SCALE = "1.5";
       EDITOR = "nvim";
       PATH = [ "/home/thaumy/app/sh/" ];
     };
@@ -217,10 +237,6 @@
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
 
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "22.11"; # Did you read the comment?

@@ -68,6 +68,16 @@
     };
   };
 
+  services.mysql = {
+    enable = true;
+    package = pkgs.mysql80;
+  };
+
+  services.postgresql = {
+    enable = true;
+    package = pkgs.postgresql_15;
+  };
+
   services.xserver = {
     enable = true;
 
@@ -79,6 +89,14 @@
     displayManager.gdm.enable = true;
     desktopManager.gnome.enable = true;
 
+    # Enable automatic login for the user.
+    displayManager.autoLogin.enable = true;
+    displayManager.autoLogin.user = "thaumy";
+
+    # Enable touchpad support (enabled default in most desktopManager).
+    # libinput.enable = true;
+
+    dpi = 180;
     videoDrivers = [ "nvidia" ];
     excludePackages = [ pkgs.xterm ];
   };
@@ -109,9 +127,6 @@
     #media-session.enable = true;
   };
 
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.xserver.libinput.enable = true;
-
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.thaumy = {
     isNormalUser = true;
@@ -120,10 +135,6 @@
     packages = with pkgs; [
     ];
   };
-
-  # Enable automatic login for the user.
-  services.xserver.displayManager.autoLogin.enable = true;
-  services.xserver.displayManager.autoLogin.user = "thaumy";
 
   systemd.services = {
     # Workaround for GNOME autologin:
@@ -199,13 +210,10 @@
       gnome.gnome-contacts
     ];
     variables = {
-      #GDK_SCALE = "1.25";
-      #GDK_DPI_SCALE = "1.5";
       EDITOR = "nvim";
       PATH = [ "/home/thaumy/app/sh/" ];
     };
   };
-  services.xserver.dpi = 180;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.

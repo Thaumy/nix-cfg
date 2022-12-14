@@ -68,37 +68,39 @@
     };
   };
 
-  services.mysql = {
-    enable = true;
-    package = pkgs.mysql80;
-  };
+  services = {
+    mysql = {
+      enable = true;
+      package = pkgs.mysql80;
+    };
 
-  services.postgresql = {
-    enable = true;
-    package = pkgs.postgresql_15;
-  };
+    postgresql = {
+      enable = true;
+      package = pkgs.postgresql_15;
+    };
 
-  services.xserver = {
-    enable = true;
+    xserver = {
+      enable = true;
 
-    # Configure keymap in X11
-    layout = "us";
-    xkbVariant = "";
+      # Configure keymap in X11
+      layout = "us";
+      xkbVariant = "";
 
-    # Enable the GNOME Desktop Environment.
-    displayManager.gdm.enable = true;
-    desktopManager.gnome.enable = true;
+      # Enable the GNOME Desktop Environment.
+      displayManager.gdm.enable = true;
+      desktopManager.gnome.enable = true;
 
-    # Enable automatic login for the user.
-    displayManager.autoLogin.enable = true;
-    displayManager.autoLogin.user = "thaumy";
+      # Enable automatic login for the user.
+      displayManager.autoLogin.enable = true;
+      displayManager.autoLogin.user = "thaumy";
 
-    # Enable touchpad support (enabled default in most desktopManager).
-    # libinput.enable = true;
+      # Enable touchpad support (enabled default in most desktopManager).
+      # libinput.enable = true;
 
-    dpi = 180;
-    videoDrivers = [ "nvidia" ];
-    excludePackages = [ pkgs.xterm ];
+      dpi = 180;
+      videoDrivers = [ "nvidia" ];
+      excludePackages = [ pkgs.xterm ];
+    };
   };
 
   hardware = {
@@ -157,6 +159,8 @@
     systemPackages = with pkgs; [
       (writeShellScriptBin "backup" 
         (builtins.readFile /home/thaumy/app/sh/backup/backup.sh))
+      cargo
+      rustc
       go
       tor
       vlc
@@ -172,16 +176,17 @@
       xmrig
       clash
       docker
-      nodejs
+      #nodejs
       vscode
       rustup
       vsftpd
       mysql80
-      systemd
       postman
       tdesktop
+      patchelf
       neofetch
       chromium
+      nix-index
       wireshark
       wpsoffice
       monero-gui
@@ -199,6 +204,7 @@
       gnome.gnome-tweaks
       jetbrains.datagrip
       jetbrains.webstorm
+      gnome.gnome-terminal
       jetbrains.idea-ultimate
     ];
     gnome.excludePackages = with pkgs; [
@@ -249,7 +255,14 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "22.11"; # Did you read the comment?
 
-  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config = {
+    allowUnfree = true;
+    packageOverrides = pkgs: {
+      nur = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
+        inherit pkgs;
+      };
+    };
+  };
 
   nix.settings.substituters = [
     "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"

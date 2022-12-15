@@ -157,8 +157,12 @@
 
   environment = {
     systemPackages = with pkgs; [
+
       (writeShellScriptBin "backup" 
         (builtins.readFile /home/thaumy/app/sh/backup/backup.sh))
+
+      nur.repos.thaumy.microsoft-todo-electron
+
       cargo
       rustc
       go
@@ -191,6 +195,7 @@
       wpsoffice
       monero-gui
       obs-studio
+      nixpkgs-fmt
       dotnet-sdk_7
       postgresql_15
       ffmpeg_5-full

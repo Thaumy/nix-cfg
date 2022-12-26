@@ -156,15 +156,18 @@
   };
 
   environment = {
-    systemPackages = with pkgs; [
 
+    localBinInPath = true;
+
+    systemPackages = with pkgs; [
+      
       (writeShellScriptBin "backup" 
         (builtins.readFile /home/thaumy/app/sh/backup/backup.sh))
 
       nur.repos.thaumy.microsoft-todo-electron
-
-      cargo
-      rustc
+      rust-bin.nightly.latest.default
+      
+      jq
       go
       tor
       vlc
@@ -180,13 +183,13 @@
       xmrig
       clash
       docker
-      #nodejs
+      nodejs
       vscode
-      rustup
       vsftpd
       mysql80
       postman
       tdesktop
+      python39
       patchelf
       neofetch
       chromium
@@ -195,10 +198,11 @@
       wpsoffice
       monero-gui
       obs-studio
+      pkg-config
       nixpkgs-fmt
       dotnet-sdk_7
-      postgresql_15
       ffmpeg_5-full
+      postgresql_15
       github-desktop
       android-studio
       jetbrains.rider
@@ -206,11 +210,12 @@
       jetbrains.clion
       jetbrains.goland
       gnome.gnome-boxes
-      gnome.gnome-tweaks
       jetbrains.datagrip
+      gnome.gnome-tweaks
       jetbrains.webstorm
       gnome.gnome-terminal
       jetbrains.idea-ultimate
+      jetbrains.pycharm-professional
     ];
     gnome.excludePackages = with pkgs; [
       gnome-tour 
@@ -260,11 +265,16 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "22.11"; # Did you read the comment?
 
-  nixpkgs.config = {
-    allowUnfree = true;
-    packageOverrides = pkgs: {
-      nur = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
-        inherit pkgs;
+  nixpkgs = {
+    overlays = [ 
+      (import (builtins.fetchTarball "https://github.com/oxalica/rust-overlay/archive/master.tar.gz")) 
+    ];
+    config = {
+      allowUnfree = true;
+      packageOverrides = pkgs: {
+        nur = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
+          inherit pkgs;
+        };
       };
     };
   };

@@ -1,10 +1,9 @@
 { config, pkgs, ... }:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  imports = [ # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+  ];
 
   boot = {
     loader = {
@@ -32,9 +31,7 @@
     defaultLocale = "en_US.UTF-8";
     inputMethod = {
       enabled = "fcitx5";
-      fcitx5 = {
-        addons = with pkgs; [ fcitx5-chinese-addons ];
-      };
+      fcitx5 = { addons = with pkgs; [ fcitx5-chinese-addons ]; };
     };
     extraLocaleSettings = {
       LC_ADDRESS = "en_US.UTF-8";
@@ -134,8 +131,7 @@
     isNormalUser = true;
     description = "Thaumy";
     extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [
-    ];
+    packages = with pkgs; [ ];
   };
 
   systemd.services = {
@@ -151,7 +147,7 @@
         Restart = "always";
         ExecStart = "${pkgs.clash}/bin/clash -d /home/thaumy/cfg/clash";
       };
-      wantedBy= [ "multi-user.target" ];
+      wantedBy = [ "multi-user.target" ];
     };
   };
 
@@ -160,13 +156,15 @@
     localBinInPath = true;
 
     systemPackages = with pkgs; [
-      
-      (writeShellScriptBin "backup" 
+
+      (writeShellScriptBin "backup"
         (builtins.readFile /home/thaumy/app/sh/backup/backup.sh))
 
       nur.repos.thaumy.microsoft-todo-electron
       rust-bin.nightly.latest.default
-      
+      #rustup
+      #rust-analyzer
+
       jq
       go
       tor
@@ -185,9 +183,11 @@
       docker
       nodejs
       vscode
+      nixfmt
       vsftpd
       mysql80
       postman
+      yarn2nix
       tdesktop
       python39
       patchelf
@@ -218,7 +218,7 @@
       jetbrains.pycharm-professional
     ];
     gnome.excludePackages = with pkgs; [
-      gnome-tour 
+      gnome-tour
       gnome.gnome-maps
       gnome.gnome-music
       gnome.simple-scan
@@ -266,21 +266,26 @@
   system.stateVersion = "22.11"; # Did you read the comment?
 
   nixpkgs = {
-    overlays = [ 
-      (import (builtins.fetchTarball "https://github.com/oxalica/rust-overlay/archive/master.tar.gz")) 
+    overlays = [
+      (import (builtins.fetchTarball
+        "https://github.com/oxalica/rust-overlay/archive/master.tar.gz"))
     ];
     config = {
       allowUnfree = true;
       packageOverrides = pkgs: {
-        nur = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
-          inherit pkgs;
-        };
+        nur = import (builtins.fetchTarball
+          "https://github.com/nix-community/NUR/archive/master.tar.gz") {
+            inherit pkgs;
+          };
       };
     };
   };
 
-  nix.settings.substituters = [
-    "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
-    "https://cache.nixos.org/"
-  ];
+  nix.settings = {
+    experimental-features = [ "nix-command" "flakes" ];
+    substituters = [
+      "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
+      "https://cache.nixos.org/"
+    ];
+  };
 }

@@ -12,37 +12,156 @@
       efi.efiSysMountPoint = "/boot/efi";
     };
     supportedFilesystems = [ "ntfs" ];
-    kernelPackages = pkgs.linuxPackages_6_0;
+    kernelPackages = pkgs.linuxPackages_6_1;
   };
 
-  networking.hostName = "nixos"; # hostname
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  environment = {
+    localBinInPath = true;
+    systemPackages = with pkgs; [
 
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
+      (writeShellScriptBin "backup"
+        (builtins.readFile /home/thaumy/app/sh/backup/backup.sh))
 
-  # Enable networking
-  networking.networkmanager.enable = true;
+      nur.repos.thaumy.idbuilder
+      nur.repos.thaumy.microsoft-todo-electron
+
+      (rust-bin.nightly."2023-01-11".default.override {
+        extensions = [ "rust-src" ];
+      })
+
+      jq
+      go
+      tor
+      vlc
+      git
+      gcc
+      jdk
+      wget
+      tree
+      htop
+      glow
+      ocaml
+      xclip
+      p7zip
+      xmrig
+      clash
+      docker
+      nodejs
+      podman
+      vscode
+      nixfmt
+      vsftpd
+      mysql80
+      postman
+      yarn2nix
+      tdesktop
+      python39
+      patchelf
+      neofetch
+      chromium
+      nix-index
+      distrobox
+      wireshark
+      wpsoffice
+      monero-gui
+      obs-studio
+      pkg-config
+      nixpkgs-fmt
+      dotnet-sdk_7
+      #home-manager
+      ffmpeg_5-full
+      postgresql_15
+      github-desktop
+      android-studio
+      element-desktop
+
+      gnome.gnome-boxes
+      gnome.gnome-tweaks
+      gnome.gnome-terminal
+
+      jetbrains.rider
+      jetbrains.clion
+      jetbrains.goland
+      jetbrains.datagrip
+      jetbrains.webstorm
+      jetbrains.idea-ultimate
+      jetbrains.pycharm-professional
+    ];
+    gnome.excludePackages = with pkgs; [
+      gnome-tour
+      gnome.gnome-maps
+      gnome.gnome-music
+      gnome.simple-scan
+      gnome.gnome-weather
+      gnome.gnome-contacts
+    ];
+    variables = { EDITOR = "nvim"; };
+  };
+
+  # Some programs need SUID wrappers, can be configured further or are
+  # started in user sessions.
+  # programs.mtr.enable = true;
+  programs = {
+    fish.enable = true;
+
+    gnupg.agent = {
+      enable = true;
+      enableSSHSupport = true;
+      pinentryFlavor = "gnome3";
+    };
+
+    neovim = {
+      enable = true;
+      viAlias = true;
+      vimAlias = true;
+      configure = {
+        customRC = (builtins.readFile /home/thaumy/cfg/neovim/vimrc);
+      };
+    };
+  };
+
+  # Define a user account. Don't forget to set a password with ‘passwd’.
+  users.users.thaumy = {
+    description = "Thaumy";
+    isNormalUser = true;
+    shell = pkgs.fish;
+    packages = with pkgs; [ ];
+    extraGroups = [ "networkmanager" "wheel" ];
+  };
+
+  networking = {
+    hostName = "nixos";
+
+    # Enable networking
+    networkmanager.enable = true;
+
+    # Configure network proxy if necessary
+    proxy.default = "http://localhost:7890";
+    proxy.noProxy = "127.0.0.1,localhost,internal.domain";
+
+    # Enables wireless support via wpa_supplicant.
+    # wireless.enable = true;
+  };
 
   time.timeZone = "Asia/Shanghai";
 
-  i18n = {
-    defaultLocale = "en_US.UTF-8";
+  i18n = let locale = "en_US.UTF-8";
+  in {
+    defaultLocale = locale;
     inputMethod = {
       enabled = "fcitx5";
       fcitx5 = { addons = with pkgs; [ fcitx5-chinese-addons ]; };
     };
     extraLocaleSettings = {
-      LC_ADDRESS = "en_US.UTF-8";
-      LC_IDENTIFICATION = "en_US.UTF-8";
-      LC_MEASUREMENT = "en_US.UTF-8";
-      LC_MONETARY = "en_US.UTF-8";
-      LC_NAME = "en_US.UTF-8";
-      LC_NUMERIC = "en_US.UTF-8";
-      LC_PAPER = "en_US.UTF-8";
-      LC_TELEPHONE = "en_US.UTF-8";
-      LC_TIME = "en_US.UTF-8";
+      LC_NAME = locale;
+      LC_TIME = locale;
+      LC_PAPER = locale;
+      LC_NUMERIC = locale;
+      LC_ADDRESS = locale;
+      LC_MONETARY = locale;
+      LC_TELEPHONE = locale;
+      LC_MEASUREMENT = locale;
+      LC_IDENTIFICATION = locale;
     };
   };
 
@@ -98,6 +217,9 @@
       videoDrivers = [ "nvidia" ];
       excludePackages = [ pkgs.xterm ];
     };
+
+    # Enable CUPS to print documents.
+    printing.enable = true;
   };
 
   hardware = {
@@ -105,9 +227,6 @@
     nvidia.modesetting.enable = true;
     nvidia.package = config.boot.kernelPackages.nvidiaPackages.production;
   };
-
-  # Enable CUPS to print documents.
-  services.printing.enable = true;
 
   # Enable sound with pipewire.
   sound.enable = true;
@@ -126,14 +245,6 @@
     #media-session.enable = true;
   };
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.thaumy = {
-    isNormalUser = true;
-    description = "Thaumy";
-    extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [ ];
-  };
-
   systemd.services = {
     # Workaround for GNOME autologin:
     # https://github.com/NixOS/nixpkgs/issues/103746#issuecomment-945091229
@@ -148,105 +259,6 @@
         ExecStart = "${pkgs.clash}/bin/clash -d /home/thaumy/cfg/clash";
       };
       wantedBy = [ "multi-user.target" ];
-    };
-  };
-
-  environment = {
-
-    localBinInPath = true;
-
-    systemPackages = with pkgs; [
-
-      (writeShellScriptBin "backup"
-        (builtins.readFile /home/thaumy/app/sh/backup/backup.sh))
-
-      nur.repos.thaumy.microsoft-todo-electron
-      rust-bin.nightly.latest.default
-      #rustup
-      #rust-analyzer
-
-      jq
-      go
-      tor
-      vlc
-      git
-      gcc
-      jdk
-      wget
-      htop
-      glow
-      ocaml
-      xclip
-      p7zip
-      xmrig
-      clash
-      docker
-      nodejs
-      vscode
-      nixfmt
-      vsftpd
-      mysql80
-      postman
-      yarn2nix
-      tdesktop
-      python39
-      patchelf
-      neofetch
-      chromium
-      nix-index
-      wireshark
-      wpsoffice
-      monero-gui
-      obs-studio
-      pkg-config
-      nixpkgs-fmt
-      dotnet-sdk_7
-      ffmpeg_5-full
-      postgresql_15
-      github-desktop
-      android-studio
-      jetbrains.rider
-      element-desktop
-      jetbrains.clion
-      jetbrains.goland
-      gnome.gnome-boxes
-      jetbrains.datagrip
-      gnome.gnome-tweaks
-      jetbrains.webstorm
-      gnome.gnome-terminal
-      jetbrains.idea-ultimate
-      jetbrains.pycharm-professional
-    ];
-    gnome.excludePackages = with pkgs; [
-      gnome-tour
-      gnome.gnome-maps
-      gnome.gnome-music
-      gnome.simple-scan
-      gnome.gnome-weather
-      gnome.gnome-contacts
-    ];
-    variables = {
-      EDITOR = "nvim";
-      PATH = [ "/home/thaumy/app/sh/" ];
-    };
-  };
-
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  programs = {
-    gnupg.agent = {
-      enable = true;
-      enableSSHSupport = true;
-      pinentryFlavor = "gnome3";
-    };
-    neovim = {
-      enable = true;
-      viAlias = true;
-      vimAlias = true;
-      configure = {
-        customRC = (builtins.readFile /home/thaumy/cfg/neovim/vimrc);
-      };
     };
   };
 

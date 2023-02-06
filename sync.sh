@@ -1,3 +1,1 @@
-declare configuration=$(cat /etc/nixos/configuration.nix)
-touch configuration.nix
-echo "$configuration" > configuration.nix
+cp -r $HOME/cfg/nixos/* ./

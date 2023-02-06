@@ -13,80 +13,13 @@
     };
     supportedFilesystems = [ "ntfs" ];
     kernelPackages = pkgs.linuxPackages_6_1;
+    kernel.sysctl = { "vm.swappiness" = 50; };
   };
 
   environment = {
     localBinInPath = true;
-    systemPackages = with pkgs; [
+    systemPackages = ((import ./pkgs.nix) pkgs);
 
-      (writeShellScriptBin "backup"
-        (builtins.readFile /home/thaumy/app/sh/backup/backup.sh))
-
-      nur.repos.thaumy.idbuilder
-      nur.repos.thaumy.microsoft-todo-electron
-
-      (rust-bin.nightly."2023-01-11".default.override {
-        extensions = [ "rust-src" ];
-      })
-
-      jq
-      go
-      tor
-      vlc
-      git
-      gcc
-      jdk
-      wget
-      tree
-      htop
-      glow
-      ocaml
-      xclip
-      p7zip
-      xmrig
-      clash
-      docker
-      nodejs
-      podman
-      vscode
-      nixfmt
-      vsftpd
-      mysql80
-      postman
-      yarn2nix
-      tdesktop
-      python39
-      patchelf
-      neofetch
-      chromium
-      nix-index
-      distrobox
-      wireshark
-      wpsoffice
-      monero-gui
-      obs-studio
-      pkg-config
-      nixpkgs-fmt
-      dotnet-sdk_7
-      #home-manager
-      ffmpeg_5-full
-      postgresql_15
-      github-desktop
-      android-studio
-      element-desktop
-
-      gnome.gnome-boxes
-      gnome.gnome-tweaks
-      gnome.gnome-terminal
-
-      jetbrains.rider
-      jetbrains.clion
-      jetbrains.goland
-      jetbrains.datagrip
-      jetbrains.webstorm
-      jetbrains.idea-ultimate
-      jetbrains.pycharm-professional
-    ];
     gnome.excludePackages = with pkgs; [
       gnome-tour
       gnome.gnome-maps
@@ -96,6 +29,9 @@
       gnome.gnome-contacts
     ];
     variables = { EDITOR = "nvim"; };
+    sessionVariables = {
+      # NIXOS_OZONE_WL = "1";
+    };
   };
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -115,8 +51,14 @@
       viAlias = true;
       vimAlias = true;
       configure = {
-        customRC = (builtins.readFile /home/thaumy/cfg/neovim/vimrc);
+        customRC = (builtins.readFile /home/thaumy/cfg/neovim/rc);
       };
+    };
+
+    steam = {
+      enable = true;
+      remotePlay.openFirewall = true;
+      dedicatedServer.openFirewall = true;
     };
   };
 
@@ -220,6 +162,8 @@
 
     # Enable CUPS to print documents.
     printing.enable = true;
+
+    udev.extraRules = "";
   };
 
   hardware = {
@@ -267,11 +211,9 @@
   # Enable the OpenSSH daemon.
   # services.openssh.enable = true;
 
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
+  # networking.firewall.allowedTCPPorts = [ 40040 ];
+  # networking.firewall.allowedUDPPorts = [  ];
+  networking.firewall.enable = false;
 
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
@@ -281,6 +223,7 @@
     overlays = [
       (import (builtins.fetchTarball
         "https://github.com/oxalica/rust-overlay/archive/master.tar.gz"))
+      (import ./overlays/chromium.nix)
     ];
     config = {
       allowUnfree = true;

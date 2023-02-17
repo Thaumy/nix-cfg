@@ -1,65 +1,44 @@
 { config, pkgs, ... }:
 
 {
-  imports = [ # Include the results of the hardware scan.
+  imports = [
+    ./boot.nix
+    ./i18n.nix
+    ./pkgs.nix
+    ./programs.nix
+    ./services.nix
     ./hardware-configuration.nix
   ];
 
-  boot = {
-    loader = {
-      systemd-boot.enable = true;
-      efi.canTouchEfiVariables = true;
-      efi.efiSysMountPoint = "/boot/efi";
-    };
-    supportedFilesystems = [ "ntfs" ];
-    kernelPackages = pkgs.linuxPackages_6_1;
-    kernel.sysctl = { "vm.swappiness" = 50; };
-  };
-
   environment = {
     localBinInPath = true;
-    systemPackages = ((import ./pkgs.nix) pkgs);
 
     gnome.excludePackages = with pkgs; [
+      kgx
+      epiphany
       gnome-tour
+      gnome.yelp
+      gnome.totem
       gnome.gnome-maps
       gnome.gnome-music
       gnome.simple-scan
+      gnome.gnome-clocks
       gnome.gnome-weather
+      gnome.gnome-calendar
       gnome.gnome-contacts
     ];
     variables = { EDITOR = "nvim"; };
     sessionVariables = {
       # NIXOS_OZONE_WL = "1";
+      DOTNET_ROOT = "${pkgs.dotnet-sdk_7}";
+      PATH = [
+        "/home/thaumy/.dotnet/tools"
+      ];
     };
-  };
-
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  programs = {
-    fish.enable = true;
-
-    gnupg.agent = {
-      enable = true;
-      enableSSHSupport = true;
-      pinentryFlavor = "gnome3";
-    };
-
-    neovim = {
-      enable = true;
-      viAlias = true;
-      vimAlias = true;
-      configure = {
-        customRC = (builtins.readFile /home/thaumy/cfg/neovim/rc);
-      };
-    };
-
-    steam = {
-      enable = true;
-      remotePlay.openFirewall = true;
-      dedicatedServer.openFirewall = true;
-    };
+    shellInit = ''
+      gpgconf --launch gpg-agent
+      export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+    '';
   };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -86,85 +65,6 @@
   };
 
   time.timeZone = "Asia/Shanghai";
-
-  i18n = let locale = "en_US.UTF-8";
-  in {
-    defaultLocale = locale;
-    inputMethod = {
-      enabled = "fcitx5";
-      fcitx5 = { addons = with pkgs; [ fcitx5-chinese-addons ]; };
-    };
-    extraLocaleSettings = {
-      LC_NAME = locale;
-      LC_TIME = locale;
-      LC_PAPER = locale;
-      LC_NUMERIC = locale;
-      LC_ADDRESS = locale;
-      LC_MONETARY = locale;
-      LC_TELEPHONE = locale;
-      LC_MEASUREMENT = locale;
-      LC_IDENTIFICATION = locale;
-    };
-  };
-
-  fonts = {
-    enableDefaultFonts = true;
-    fonts = with pkgs; [
-      noto-fonts
-      sarasa-gothic
-      jetbrains-mono
-      liberation_ttf
-      twemoji-color-font
-    ];
-    fontconfig = {
-      defaultFonts = {
-        emoji = [ "Twitter Color Emoji" ];
-        serif = [ "Liberation Serif" ];
-        sansSerif = [ "Sarasa UI SC" ];
-        monospace = [ "JetBrains Mono" ];
-      };
-    };
-  };
-
-  services = {
-    mysql = {
-      enable = true;
-      package = pkgs.mysql80;
-    };
-
-    postgresql = {
-      enable = true;
-      package = pkgs.postgresql_15;
-    };
-
-    xserver = {
-      enable = true;
-
-      # Configure keymap in X11
-      layout = "us";
-      xkbVariant = "";
-
-      # Enable the GNOME Desktop Environment.
-      displayManager.gdm.enable = true;
-      desktopManager.gnome.enable = true;
-
-      # Enable automatic login for the user.
-      displayManager.autoLogin.enable = true;
-      displayManager.autoLogin.user = "thaumy";
-
-      # Enable touchpad support (enabled default in most desktopManager).
-      # libinput.enable = true;
-
-      dpi = 180;
-      videoDrivers = [ "nvidia" ];
-      excludePackages = [ pkgs.xterm ];
-    };
-
-    # Enable CUPS to print documents.
-    printing.enable = true;
-
-    udev.extraRules = "";
-  };
 
   hardware = {
     opengl.enable = true;
@@ -194,7 +94,7 @@
     # https://github.com/NixOS/nixpkgs/issues/103746#issuecomment-945091229
     "getty@tty1".enable = false;
     "autovt@tty1".enable = false;
-    clash_daemon = {
+    clash-daemon = {
       enable = true;
       after = [ "network.target" ];
       serviceConfig = {
@@ -221,15 +121,17 @@
 
   nixpkgs = {
     overlays = [
-      (import (builtins.fetchTarball
-        "https://github.com/oxalica/rust-overlay/archive/master.tar.gz"))
-      (import ./overlays/chromium.nix)
+      (import ./overlay/rust.nix)
+      # (import ./overlay/vscode.nix)
+      (import ./overlay/chromium.nix)
     ];
     config = {
       allowUnfree = true;
       packageOverrides = pkgs: {
-        nur = import (builtins.fetchTarball
-          "https://github.com/nix-community/NUR/archive/master.tar.gz") {
+        nur = import
+          (builtins.fetchTarball
+            "https://github.com/nix-community/NUR/archive/master.tar.gz")
+          {
             inherit pkgs;
           };
       };

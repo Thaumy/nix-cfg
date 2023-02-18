@@ -5,20 +5,6 @@
   # started in user sessions.
   # programs.mtr.enable = true;
   programs = {
-    ssh.startAgent = false;
-
-    fish = {
-      enable = true;
-      shellAliases = {
-        cat = "bat";
-      };
-    };
-
-    gnupg.agent = {
-      enable = true;
-      enableSSHSupport = true;
-      pinentryFlavor = "gnome3";
-    };
 
     neovim = {
       enable = true;
@@ -34,5 +20,6 @@
       remotePlay.openFirewall = true;
       dedicatedServer.openFirewall = true;
     };
+
   };
 }

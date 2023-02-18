@@ -7,7 +7,7 @@
     ./pkgs.nix
     ./programs.nix
     ./services.nix
-    ./hardware-configuration.nix
+    ./hardware.nix
   ];
 
   environment = {
@@ -35,10 +35,10 @@
         "/home/thaumy/.dotnet/tools"
       ];
     };
-    shellInit = ''
-      gpgconf --launch gpg-agent
-      export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
-    '';
+    #shellInit = ''
+    #  gpgconf --launch gpg-agent
+    #  export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+    #'';
   };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -67,6 +67,7 @@
   time.timeZone = "Asia/Shanghai";
 
   hardware = {
+    bluetooth.enable = true;
     opengl.enable = true;
     nvidia.modesetting.enable = true;
     nvidia.package = config.boot.kernelPackages.nvidiaPackages.production;

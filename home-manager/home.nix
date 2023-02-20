@@ -1,19 +1,22 @@
 { config, pkgs, ... }:
 
 {
+
   imports = [
     ./gpg.nix
+    ./git.nix
     ./pkgs.nix
     ./fish.nix
   ];
 
   home = {
     username = "thaumy";
-    stateVersion = "21.11";
+    stateVersion = "22.11";
     homeDirectory = "/home/thaumy";
   };
 
   nixpkgs.config = {
+
     allowUnfree = true;
     packageOverrides = pkgs: {
       nur = import
@@ -23,6 +26,7 @@
           inherit pkgs;
         };
     };
+
   };
 
 }

@@ -6,6 +6,8 @@
   # programs.mtr.enable = true;
   programs = {
 
+    fish.enable = true;
+
     neovim = {
       enable = true;
       viAlias = true;

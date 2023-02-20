@@ -24,9 +24,11 @@ in
     (writeShellScriptBin "update-clash-sub"
       (builtins.readFile /home/thaumy/sh/update-clash-sub/run.sh))
 
-    #editor
+    #office
     stable-pkgs.wpsoffice
     stable-pkgs.libreoffice
+
+    #editor
     glow
     vscode
     android-studio

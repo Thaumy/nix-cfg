@@ -1,6 +1,7 @@
 { config, pkgs, ... }:
 
 {
+
   boot = {
     loader = {
       systemd-boot.enable = true;
@@ -9,9 +10,10 @@
     };
     supportedFilesystems = [ "ntfs" ];
     kernelPackages = pkgs.linuxPackages_6_1;
-    kernel.sysctl = { "vm.swappiness" = 50; };
+    kernel.sysctl = { "vm.swappiness" = 30; };
     kernelModules = [ "v4l2loopback" ];
     extraModulePackages = with config.boot.kernelPackages;
       [ v4l2loopback.out ];
   };
+
 }

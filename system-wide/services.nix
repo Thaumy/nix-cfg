@@ -1,6 +1,25 @@
 { config, pkgs, ... }:
 
 {
+
+  systemd.services = {
+    # Workaround for GNOME autologin:
+    # https://github.com/NixOS/nixpkgs/issues/103746#issuecomment-945091229
+    "getty@tty1".enable = false;
+    "autovt@tty1".enable = false;
+  };
+
+  systemd.services.clash-daemon = {
+    enable = true;
+    after = [ "network.target" ];
+    serviceConfig = {
+      Type = "simple";
+      Restart = "always";
+      ExecStart = "${pkgs.clash}/bin/clash -d /home/thaumy/cfg/clash";
+    };
+    wantedBy = [ "multi-user.target" ];
+  };
+
   services = {
     mysql = {
       enable = true;

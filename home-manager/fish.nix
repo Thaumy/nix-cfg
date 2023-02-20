@@ -3,13 +3,17 @@
 {
 
   programs.fish = {
+
     enable = true;
+
     shellAliases = {
       cat = "bat";
     };
+
     shellInit = ''
-      export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+      export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
     '';
+
     interactiveShellInit = ''
       # color scheme
       set -U fish_color_normal 767676 #-575f66
@@ -38,7 +42,7 @@
       set -U fish_color_host_remote 
       # ...
       set -U fish_pager_color_background 
-      set -U fish_pager_color_prefix 000000
+      set -U fish_pager_color_prefix 131518
       set -U fish_pager_color_progress brwhite --background=6790c5
       set -U fish_pager_color_completion ffffff
       set -U fish_pager_color_description 8b8b8b
@@ -53,6 +57,7 @@
       set -U fish_pager_color_secondary_completion 
       set -U fish_pager_color_secondary_description 
     '';
+
   };
 
 }

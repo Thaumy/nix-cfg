@@ -8,6 +8,7 @@
 
     shellAliases = {
       cat = "bat";
+      bat = "cat";
     };
 
     shellInit = ''

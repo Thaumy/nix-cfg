@@ -51,22 +51,5 @@ in
     postman
     monero-gui
     github-desktop
-
-    #lsp
-    sqls
-    deno
-    gopls
-    rnix-lsp
-    marksman
-    rust-analyzer
-    omnisharp-roslyn
-    jdt-language-server
-    nodePackages.pyright
-    kotlin-language-server
-    sumneko-lua-language-server
-    nodePackages.bash-language-server
-    nodePackages.yaml-language-server
-    haskellPackages.haskell-language-server
-    nodePackages.vscode-langservers-extracted
   ];
 }

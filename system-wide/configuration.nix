@@ -4,12 +4,17 @@
 
   imports = [
     ./boot.nix
-    ./i18n.nix
+    ./hardware-configuration.nix
+    ./local.nix
+    ./networking.nix
     ./pkgs.nix
-    ./fonts.nix
-    ./programs.nix
-    ./services.nix
-    ./hardware.nix
+
+    ./app/clash.nix
+    ./app/fish.nix
+    ./app/mysql.nix
+    ./app/postgres.nix
+    ./app/steam.nix
+    ./app/yubikey.nix
   ];
 
   environment = {
@@ -33,26 +38,47 @@
     extraGroups = [ "networkmanager" "wheel" ];
   };
 
-  networking = {
-    hostName = "nixos";
-
-    # Enable networking
-    networkmanager.enable = true;
-
-    # Configure network proxy if necessary
-    proxy.default = "http://localhost:7890";
-    proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-    # Enables wireless support via wpa_supplicant.
-    # wireless.enable = true;
-  };
-
-  time.timeZone = "Asia/Shanghai";
-
   hardware = {
     opengl.enable = true;
     nvidia.modesetting.enable = true;
     nvidia.package = config.boot.kernelPackages.nvidiaPackages.production;
+  };
+
+  systemd.services = {
+    # Workaround for GNOME autologin:
+    # https://github.com/NixOS/nixpkgs/issues/103746#issuecomment-945091229
+    "getty@tty1".enable = false;
+    "autovt@tty1".enable = false;
+  };
+
+  services = {
+
+    xserver = {
+      enable = true;
+
+      # Configure keymap in X11
+      layout = "us";
+      xkbVariant = "";
+
+      # Enable the GNOME Desktop Environment.
+      displayManager.gdm.enable = true;
+      desktopManager.gnome.enable = true;
+
+      # Enable automatic login for the user.
+      displayManager.autoLogin.enable = true;
+      displayManager.autoLogin.user = "thaumy";
+
+      # Enable touchpad support (enabled default in most desktopManager).
+      # libinput.enable = true;
+
+      dpi = 180;
+      videoDrivers = [ "nvidia" ];
+      excludePackages = [ pkgs.xterm ];
+    };
+
+    # Enable CUPS to print documents.
+    printing.enable = true;
+
   };
 
   # Enable sound with pipewire.
@@ -72,15 +98,6 @@
     #media-session.enable = true;
   };
 
-  # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
-
-  # networking.firewall.allowedTCPPorts = [ 40040 ];
-  # networking.firewall.allowedUDPPorts = [  ];
-  networking.firewall.enable = false;
-
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "22.11"; # Did you read the comment?
@@ -89,18 +106,18 @@
     overlays = [
       (import ./overlay/rust.nix)
       # (import ./overlay/vscode.nix)
+      # (import ./overlay/neovim.nix)
       (import ./overlay/chromium.nix)
     ];
-    config = {
-      allowUnfree = true;
-      packageOverrides = pkgs: {
-        nur = import
-          (builtins.fetchTarball
-            "https://github.com/nix-community/NUR/archive/master.tar.gz")
-          {
-            inherit pkgs;
-          };
-      };
+
+    config.allowUnfree = true;
+    config.packageOverrides = pkgs: {
+      nur = import
+        (builtins.fetchTarball
+          "https://github.com/nix-community/NUR/archive/master.tar.gz")
+        {
+          inherit pkgs;
+        };
     };
   };
 

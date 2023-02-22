@@ -3,10 +3,11 @@
 {
 
   imports = [
-    ./gpg.nix
-    ./git.nix
     ./pkgs.nix
-    ./fish.nix
+    ./app/gpg.nix
+    ./app/git.nix
+    ./app/fish.nix
+    ./app/neovim.nix
   ];
 
   home = {

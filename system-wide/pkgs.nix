@@ -1,6 +1,8 @@
 { config, pkgs, ... }:
 
 let
+  stable-pkgs = import <nixos-22.11> { config = { allowUnfree = true; }; };
+
   sdk = with pkgs;[
     go
     jdk
